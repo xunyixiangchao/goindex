@@ -239,6 +239,7 @@ class view{
         if(n == ''){
           break;
         }
+	n = decodeURIComponent(n);
         html += `<i class="mdui-icon material-icons mdui-icon-dark" style="margin:0;">chevron_right</i>
         <a href="${p}">${n}</a>`;
       }
@@ -297,6 +298,7 @@ class view{
   }
 
   layout(title,siteName,nav,content){
+    title = decodeURIComponent(title);
     return `<!DOCTYPE html>
 <html>
 <head>
