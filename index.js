@@ -99,6 +99,7 @@ class googleDrive {
       let url = 'https://www.googleapis.com/drive/v3/files';
       let params = {'includeItemsFromAllDrives':true,'supportsAllDrives':true};
       params.q = `'${parent}' in parents and trashed = false`;
+      params.orderBy= 'folder,modifiedTime desc,name';
       params.fields = "nextPageToken, files(id, name, mimeType, size , modifiedTime)";
       url += '?'+this.enQuery(params);
       let requestOption = await this.requestOption();
@@ -260,6 +261,9 @@ class view{
       console.log(item);
       let p = path+item.name+'/';
       let d = new Date(item['modifiedTime']);
+      if(item['size']==undefined){
+        item['size'] = "";
+      }
       if(item['mimeType'] == 'application/vnd.google-apps.folder'){
         html +=`<li class="mdui-list-item mdui-ripple"><a href="${p}">
               <div class="mdui-col-xs-12 mdui-col-sm-7 mdui-text-truncate">
