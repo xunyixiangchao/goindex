@@ -101,6 +101,7 @@ class googleDrive {
       params.q = `'${parent}' in parents and trashed = false`;
       params.orderBy= 'folder,modifiedTime desc,name';
       params.fields = "nextPageToken, files(id, name, mimeType, size , modifiedTime)";
+      params.pageSize = 1000;
       url += '?'+this.enQuery(params);
       let requestOption = await this.requestOption();
       let response = await fetch(url, requestOption);
