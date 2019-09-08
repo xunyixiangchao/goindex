@@ -1,16 +1,34 @@
 var authConfig = {
-    "siteName": "GoIndex",
+    "siteName": "GoIndex", // 网站名称
+    "root_pass": "",  // 根目录密码，优先于.password
+    "version" : 1.0, // 程序版本
     "client_id": "202264815644.apps.googleusercontent.com",
     "client_secret": "X4Z3ca8xfWDb1Voo-F9a7ZxJ",
-    "refresh_token": "",
-    "root": ""
+    "refresh_token": "", // 授权 token
+    "root": "" // 根目录ID
 };
 
 var gd;
 
+var html = `
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=no"/>
+	<title>${authConfig.siteName}</title>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/donwa/goindex/themes/material/app.js"></script>
+
+</head>
+<body>
+</body>
+</html>
+`;
+
 addEventListener('fetch', event => {
-    event.respondWith(handleRequest(event.request))
-})
+    event.respondWith(handleRequest(event.request));
+});
 
 /**
  * Fetch and log a request
@@ -21,22 +39,51 @@ async function handleRequest(request) {
       gd = new googleDrive(authConfig);
     }
 
-    // if(request.method == 'POST'){
-    //   return apiRequest(request);
-    // }
+    if(request.method == 'POST'){
+      return apiRequest(request);
+    }
 
     let url = new URL(request.url);
     let path = url.pathname;
+    let action = url.searchParams.get('a');
 
-    if(path.substr(-1) == '/'){
-      let list = await gd.list(path);
-      let v = new view();
-      let html = v.list(path, list);
+    if(path.substr(-1) == '/' || action != null){
       return new Response(html,{status:200,headers:{'Content-Type':'text/html; charset=utf-8'}});
     }else{
       let file = await gd.file(path);
       let range = request.headers.get('Range');
       return gd.down(file.id, range);
+    }
+}
+
+
+async function apiRequest(request) {
+    let url = new URL(request.url);
+    let path = url.pathname;
+
+    let option = {status:200,headers:{'Access-Control-Allow-Origin':'*'}}
+
+    if(path.substr(-1) == '/'){
+      // check password
+      let password = await gd.password(path);
+      console.log("dir password", password);
+      if(password != undefined && password != null && password != ""){
+        try{
+          var obj = await request.json();
+        }catch(e){
+          var obj = {};
+        }
+        console.log(password,obj);
+        if(password != obj.password){
+          let html = `{"error": {"code": 401,"message": "password error."}}`;
+          return new Response(html,option);
+        }
+      }
+      let list = await gd.list(path);
+      return new Response(JSON.stringify(list),option);
+    }else{
+      let file = await gd.file(path);
+      let range = request.headers.get('Range');
       return new Response(JSON.stringify(file));
     }
 }
@@ -46,7 +93,9 @@ class googleDrive {
         this.authConfig = authConfig;
         this.paths = [];
         this.files = [];
+        this.passwords = [];
         this.paths["/"] = authConfig.root;
+        this.passwords["/"] = authConfig.root_pass;
         this.accessToken();
     }
 
@@ -90,6 +139,26 @@ class googleDrive {
       return this._ls(id);
     }
 
+    async password(path){
+      if(this.passwords[path] !== undefined){
+        return this.passwords[path];
+      }
+
+      console.log("load",path,".password",this.passwords[path]);
+
+      let file = await gd.file(path+'.password');
+      if(file == undefined){
+        this.passwords[path] = null;
+      }else{
+        let url = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`;
+        let requestOption = await this.requestOption();
+        let response = await this.fetch200(url, requestOption);
+        this.passwords[path] = await response.text();
+      }
+
+      return this.passwords[path];
+    }
+
     async _ls(parent){
       console.log("_ls",parent);
 
@@ -98,8 +167,8 @@ class googleDrive {
       }
       let url = 'https://www.googleapis.com/drive/v3/files';
       let params = {'includeItemsFromAllDrives':true,'supportsAllDrives':true};
-      params.q = `'${parent}' in parents and trashed = false`;
-      params.orderBy= 'folder,modifiedTime desc,name';
+      params.q = `'${parent}' in parents and trashed = false AND name !='.password'`;
+      params.orderBy= 'folder,name,modifiedTime desc';
       params.fields = "nextPageToken, files(id, name, mimeType, size , modifiedTime)";
       params.pageSize = 1000;
       url += '?'+this.enQuery(params);
@@ -227,162 +296,6 @@ class googleDrive {
             }, ms);
         })
     }
-}
-
-class view{
-
-  nav(path){
-    let html = ``;
-    let arr = path.trim('/').split('/');
-    var p = '/';
-    if(arr.length > 0){
-      for(let n of arr){
-        p += n+'/';
-        if(n == ''){
-          break;
-        }
-	n = decodeURIComponent(n);
-        html += `<i class="mdui-icon material-icons mdui-icon-dark" style="margin:0;">chevron_right</i>
-        <a href="${p}">${n}</a>`;
-      }
-    }
-		return html;
-  }
-
-  ls(path, items){
-    let html = `<div class="mdui-row">
-	<ul class="mdui-list">
-		<li class="mdui-list-item th">
-		  <div class="mdui-col-xs-12 mdui-col-sm-7">文件</div>
-		  <div class="mdui-col-sm-3 mdui-text-right">修改时间</div>
-		  <div class="mdui-col-sm-2 mdui-text-right">大小</div>
-		</li>`;
-    
-    for(let item of items){
-      console.log(item);
-      let p = path+item.name+'/';
-      let d = new Date(item['modifiedTime']);
-      if(item['size']==undefined){
-        item['size'] = "";
-      }
-      if(item['mimeType'] == 'application/vnd.google-apps.folder'){
-        html +=`<li class="mdui-list-item mdui-ripple"><a href="${p}">
-              <div class="mdui-col-xs-12 mdui-col-sm-7 mdui-text-truncate">
-              <i class="mdui-icon material-icons">folder_open</i>
-                ${item.name}
-              </div>
-              <div class="mdui-col-sm-3 mdui-text-right">${item['modifiedTime']}</div>
-              <div class="mdui-col-sm-2 mdui-text-right">${item['size']}</div>
-              </a>
-          </li>`;
-      }else{
-        let p = path+item.name;
-        html += `<li class="mdui-list-item file mdui-ripple" target="_blank"><a href="${p}">
-            <div class="mdui-col-xs-12 mdui-col-sm-7 mdui-text-truncate">
-            <i class="mdui-icon material-icons">insert_drive_file</i>
-              ${item.name}
-            </div>
-            <div class="mdui-col-sm-3 mdui-text-right">${item['modifiedTime']}</div>
-            <div class="mdui-col-sm-2 mdui-text-right">${item['size']}</div>
-            </a>
-        </li>`;
-      }
-
-    }
-
-    html += `	</ul></div>`;
-    return html;
-  }
-
-  list(path, items){
-    let siteName = authConfig.siteName;
-    let title = `${siteName} - ${path}`;
-    let nav = this.nav(path);
-    let content = this.ls(path,items.files);
-    return this.layout(title, siteName, nav, content);
-  }
-
-  layout(title,siteName,nav,content){
-    title = decodeURIComponent(title);
-    return `<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=no"/>
-	<title>${title}</title>
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdui@0.4.1/dist/css/mdui.min.css" integrity="sha256-lCFxSSYsY5OMx6y8gp8/j6NVngvBh3ulMtrf4SX5Z5A=" crossorigin="anonymous">
-	<script src="https://cdn.jsdelivr.net/npm/mdui@0.4.1/dist/js/mdui.min.js" integrity="sha256-dZxrLDxoyEQADIAGrWhPtWqjDFvZZBigzArprSzkKgI=" crossorigin="anonymous"></script>
-	<style>
-		.mdui-appbar .mdui-toolbar{
-			height:56px;
-			font-size: 16px;
-		}
-		.mdui-toolbar>*{
-			padding: 0 6px;
-			margin: 0 2px;
-			opacity:0.5;
-		}
-		.mdui-toolbar>.mdui-typo-headline{
-			padding: 0 16px 0 0;
-		}
-		.mdui-toolbar>i{
-			padding: 0;
-		}
-		.mdui-toolbar>a:hover,a.mdui-typo-headline,a.active{
-			opacity:1;
-		}
-		.mdui-container{
-			max-width:980px;
-		}
-		.mdui-list-item{
-			-webkit-transition:none;
-			transition:none;
-		}
-		.mdui-list>.th{
-			background-color:initial;
-		}
-		.mdui-list-item>a{
-			width:100%;
-			line-height: 48px
-		}
-		.mdui-list-item{
-			margin: 2px 0px;
-			padding:0;
-		}
-		.mdui-toolbar>a:last-child{
-			opacity:1;
-		}
-		@media screen and (max-width:980px){
-			.mdui-list-item .mdui-text-right{
-				display: none;
-			}
-			.mdui-container{
-				width:100% !important;
-				margin:0px;
-			}
-			.mdui-toolbar>*{
-				display: none;
-			}
-			.mdui-toolbar>a:last-child,.mdui-toolbar>.mdui-typo-headline,.mdui-toolbar>i:first-child{
-				display: block;
-			}
-		}
-	</style>
-</head>
-<body class="mdui-theme-primary-blue-grey mdui-theme-accent-blue">
-	<header class="mdui-appbar mdui-color-theme">
-		<div class="mdui-toolbar mdui-container">
-			<a href="/" class="mdui-typo-headline">${siteName}</a>
-			${nav}
-			<!--<a href="javascript:;" class="mdui-btn mdui-btn-icon"><i class="mdui-icon material-icons">refresh</i></a>-->
-		</div>
-	</header>
-	<div class="mdui-container">
-    	${content}
-  	</div>
-</body>
-</html>`;
-  }
 }
 
 String.prototype.trim = function (char) {
