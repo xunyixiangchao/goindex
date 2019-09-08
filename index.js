@@ -6,7 +6,7 @@ var authConfig = {
     "client_id": "202264815644.apps.googleusercontent.com",
     "client_secret": "X4Z3ca8xfWDb1Voo-F9a7ZxJ",
     "refresh_token": "", // 授权 token
-    "root": "" // 根目录ID
+    "root": "root" // 根目录ID
 };
 
 var gd;
@@ -49,6 +49,9 @@ async function handleRequest(request) {
     if(path.substr(-1) == '/' || action != null){
       return new Response(html,{status:200,headers:{'Content-Type':'text/html; charset=utf-8'}});
     }else{
+      if(path.split('/').pop() == ".password"){
+         return new Response("",{status:404});
+      }
       let file = await gd.file(path);
       let range = request.headers.get('Range');
       return gd.down(file.id, range);
