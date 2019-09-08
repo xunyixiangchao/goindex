@@ -2,6 +2,7 @@
 
 // 在head 中 加载 必要静态
 document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdui@0.4.3/dist/css/mdui.min.css">');
+//document.write('<script src="//cdn.jsdelivr.net/npm/mdui@0.4.3/dist/js/mdui.js"></script>');
 document.write('<style>.mdui-appbar .mdui-toolbar{height:56px;font-size:1pc}.mdui-toolbar>*{padding:0 6px;margin:0 2px}.mdui-toolbar>i{opacity:.5}.mdui-toolbar>.mdui-typo-headline{padding:0 1pc 0 0}.mdui-toolbar>i{padding:0}.mdui-toolbar>a:hover,a.active,a.mdui-typo-headline{opacity:1}.mdui-container{max-width:980px}.mdui-list-item{transition:none}.mdui-list>.th{background-color:initial}.mdui-list-item>a{width:100%;line-height:3pc}.mdui-list-item{margin:2px 0;padding:0}.mdui-toolbar>a:last-child{opacity:1}@media screen and (max-width:980px){.mdui-list-item .mdui-text-right{display:none}.mdui-container{width:100%!important;margin:0}.mdui-toolbar>.mdui-typo-headline,.mdui-toolbar>a:last-child,.mdui-toolbar>i:first-child{display:block}}</style>');
 // 初始化页面，并载入必要资源
 function init(){
@@ -73,7 +74,7 @@ function nav(path){
 function list(path){
 	var password = localStorage.getItem('password'+path);
 	$('#list').html(`<div class="mdui-progress"><div class="mdui-progress-indeterminate"></div></div>`);
-	$.post(path,'{"password":'+password+'}', function(data,status){
+	$.post(path,'{"password":"'+password+'"}', function(data,status){
 		var obj = jQuery.parseJSON(data);
 		if(typeof obj != 'null' && obj.hasOwnProperty('error') && obj.error.code == '401'){
 			var pass = prompt("目录加密，请输入密码","");
