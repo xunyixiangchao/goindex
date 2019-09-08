@@ -1,5 +1,3 @@
-//cdn.jsdelivr.net/gh/donwa/goindex/themes/material/app.js
-
 // 在head 中 加载 必要静态
 document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdui@0.4.3/dist/css/mdui.min.css">');
 //document.write('<script src="//cdn.jsdelivr.net/npm/mdui@0.4.3/dist/js/mdui.js"></script>');
@@ -47,6 +45,7 @@ function render(path){
 
 // 渲染 title
 function title(path){
+	path = decodeURI(path);
 	$('title').html(document.siteName+' - '+path);
 }
 
@@ -59,6 +58,7 @@ function nav(path){
 	if(arr.length > 0){
 		for(i in arr){
 		  var n = arr[i];
+    	  n = decodeURI(n);
     	  p += n+'/';
     	  if(n == ''){
     	    break;
@@ -179,7 +179,7 @@ String.prototype.trim = function (char) {
 
 $(function(){
 	init();
-	var path = decodeURI(window.location.pathname);
+	var path = window.location.pathname;
 	$("body").on("click",'.folder',function(){
 	  var url = $(this).attr('href');
 	  history.pushState(null, null, url);
