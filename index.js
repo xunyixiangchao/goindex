@@ -1,6 +1,6 @@
 var authConfig = {
     "siteName": "GoIndex", // 网站名称
-    "root_pass": "",  // 根目录密码，优先于.password
+    "root_pass": "index",  // 根目录密码，优先于.password
     "version" : 1.0, // 程序版本
     "client_id": "202264815644.apps.googleusercontent.com",
     "client_secret": "X4Z3ca8xfWDb1Voo-F9a7ZxJ",
@@ -95,7 +95,9 @@ class googleDrive {
         this.files = [];
         this.passwords = [];
         this.paths["/"] = authConfig.root;
-        this.passwords["/"] = authConfig.root_pass;
+        if(authConfig.root_pass != ""){
+	        this.passwords["/"] = authConfig.root_pass;
+        }
         this.accessToken();
     }
 
