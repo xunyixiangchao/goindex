@@ -109,16 +109,22 @@ function file_preview(a) {
         case "image/gif":
         case "image/png":
             isPreview = true;
-            preview = preview.replace("previewHtml", `<img class="mdui-img-fluid" src="${fileUrl}"/>`);
+            preview = `<div id="progressBar" class="mdui-progress"><div class="mdui-progress-indeterminate"></div></div>` + preview;
+            preview = $(preview.replace("previewHtml", `<img class="mdui-img-fluid" src="${fileUrl}"/>`));
+            preview.find("img")[0].onload = function(){
+                $("#progressBar").remove();
+            }
             break;
         case "text/markdown":
         case "text/plain":
             var mdName = fileUrl.split('/').pop();
             if(mdName !== "HEAD.md" && mdName !== "README.md") {
                 isPreview = true;
+                preview = `<div id="progressBar" class="mdui-progress"><div class="mdui-progress-indeterminate"></div></div>` + preview;
                 preview = $(preview.replace("previewHtml", `<div id="markdownShow" class="mdui-typo" style="padding: 20px;"></div>`));
                 $.get(fileUrl, function(data){
                     markdown("#markdownShow",data);
+                    $("#progressBar").remove();
                 });
             }
             break;
