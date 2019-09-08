@@ -11,27 +11,38 @@ function init(){
    <div id="nav" class="mdui-toolbar mdui-container"> 
    </div> 
 </header>
-  <div class="mdui-container"> 
-   <div class="mdui-row"> 
-    <ul class="mdui-list"> 
-     <li class="mdui-list-item th"> 
-      <div class="mdui-col-xs-12 mdui-col-sm-7">
-       文件
-      </div> 
-      <div class="mdui-col-sm-3 mdui-text-right">
-       修改时间
-      </div> 
-      <div class="mdui-col-sm-2 mdui-text-right">
-       大小
-      </div> 
-      </li> 
-    </ul> 
-   </div> 
-   <div class="mdui-row"> 
-    <ul id="list" class="mdui-list"> 
-    </ul> 
-   </div> 
-  </div>
+<div class="mdui-container"> 
+
+	<div id="head_md" class="mdui-typo" style="display:none;padding: 20px 0;">
+
+	</div>
+
+	 <div class="mdui-row"> 
+	  <ul class="mdui-list"> 
+	   <li class="mdui-list-item th"> 
+	    <div class="mdui-col-xs-12 mdui-col-sm-7">
+	     文件
+	    </div> 
+	    <div class="mdui-col-sm-3 mdui-text-right">
+	     修改时间
+	    </div> 
+	    <div class="mdui-col-sm-2 mdui-text-right">
+	     大小
+	    </div> 
+	    </li> 
+	  </ul> 
+	 </div> 
+	 <div class="mdui-row"> 
+	  <ul id="list" class="mdui-list"> 
+	  </ul> 
+	 </div>
+
+
+	 <div id="readme_md" class="mdui-typo" style="display:none; padding: 20px 0;">
+	 </div>
+</div>
+
+
 `;
 	$('body').html(html);
 }
@@ -74,6 +85,8 @@ function nav(path){
 function list(path){
 	var password = localStorage.getItem('password'+path);
 	$('#list').html(`<div class="mdui-progress"><div class="mdui-progress-indeterminate"></div></div>`);
+	$('#readme_md').hide().html('');
+	$('#head_md').hide().html('');
 	$.post(path,'{"password":"'+password+'"}', function(data,status){
 		var obj = jQuery.parseJSON(data);
 		if(typeof obj != 'null' && obj.hasOwnProperty('error') && obj.error.code == '401'){
@@ -113,6 +126,16 @@ function list_files(path,files){
 	        </li>`;
 	    }else{
 	      var p = path+item.name;
+	      if(item.name == "README.md"){
+			  $.get(p, function(data){
+				  markdown("#readme_md",data);
+			  });
+		  }
+		  if(item.name == "HEAD.md"){
+			  $.get(p, function(data){
+				  markdown("#head_md",data);
+			  });
+		  }
 	      html += `<li class="mdui-list-item file mdui-ripple" target="_blank"><a href="${p}">
 	          <div class="mdui-col-xs-12 mdui-col-sm-7 mdui-text-truncate">
 	          <i class="mdui-icon material-icons">insert_drive_file</i>
@@ -188,6 +211,19 @@ $(function(){
 	});
 	render(path);
 });
+
+// README.md HEAD.md 支持
+function markdown(el, data){
+	if(window.md == undefined){
+		$.getScript('https://cdn.jsdelivr.net/npm/markdown-it@9.1.0/dist/markdown-it.min.js',function(){
+			window.md = window.markdownit();
+			markdown(el, data);
+		});
+	}else{
+		var html = md.render(data);
+		$(el).show().html(html);
+	}
+}
 
 // 监听回退事件
 window.onpopstate = function(){
