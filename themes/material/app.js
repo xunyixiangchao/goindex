@@ -190,3 +190,9 @@ $(function(){
 	});
 	render(path);
 });
+
+// 监听回退事件
+window.onpopstate = function(){
+	var path = window.location.pathname;
+	render(path);
+}
