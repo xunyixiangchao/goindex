@@ -102,6 +102,8 @@ function file_preview(a) {
     var isPreview;
     switch (fileType){
         case "video/mp4":
+        case "video/x-matroska": // .mkv
+        case "video/quicktime": // .mov
             isPreview = true;
             preview = preview.replace("previewHtml", `<video class="mdui-video-fluid" controls src="${fileUrl}"></video>`);
             break;
