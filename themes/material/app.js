@@ -1,6 +1,7 @@
 // 在head 中 加载 必要静态
-document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdui@0.4.3/dist/css/mdui.min.css">');
-//document.write('<script src="//cdn.jsdelivr.net/npm/mdui@0.4.3/dist/js/mdui.js"></script>');
+document.write('<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/mdui@0.4.3/dist/css/mdui.min.css">');
+// markdown支持
+document.write('<script src="//cdn.jsdelivr.net/npm/markdown-it@9.1.0/dist/markdown-it.min.js"></script>');
 document.write('<style>.mdui-appbar .mdui-toolbar{height:56px;font-size:1pc}.mdui-toolbar>*{padding:0 6px;margin:0 2px}.mdui-toolbar>i{opacity:.5}.mdui-toolbar>.mdui-typo-headline{padding:0 1pc 0 0}.mdui-toolbar>i{padding:0}.mdui-toolbar>a:hover,a.active,a.mdui-typo-headline{opacity:1}.mdui-container{max-width:980px}.mdui-list-item{transition:none}.mdui-list>.th{background-color:initial}.mdui-list-item>a{width:100%;line-height:3pc}.mdui-list-item{margin:2px 0;padding:0}.mdui-toolbar>a:last-child{opacity:1}@media screen and (max-width:980px){.mdui-list-item .mdui-text-right{display:none}.mdui-container{width:100%!important;margin:0}.mdui-toolbar>.mdui-typo-headline,.mdui-toolbar>a:last-child,.mdui-toolbar>i:first-child{display:block}}</style>');
 // 初始化页面，并载入必要资源
 function init(){
@@ -56,7 +57,7 @@ function title(path){
 
 // 渲染导航栏
 function nav(path){
-    var html = `<div id="nav" class="mdui-toolbar mdui-container">`;
+    var html = "";
     html += `<a href="/" class="mdui-typo-headline folder">${document.siteName}</a>`;
     var arr = path.trim('/').split('/');
     var p = '/';
@@ -71,8 +72,90 @@ function nav(path){
             html += `<i class="mdui-icon material-icons mdui-icon-dark folder" style="margin:0;">chevron_right</i><a href="${p}">${n}</a>`;
         }
     }
-    html += `</div>`;
     $('#nav').html(html);
+}
+
+// 渲染文件列表
+function list(path){
+    var password = localStorage.getItem('password'+path);
+    $('#list').html(`<div class="mdui-progress"><div class="mdui-progress-indeterminate"></div></div>`);
+    $('#readme_md').hide().html('');
+    $('#head_md').hide().html('');
+    $.post(path,'{"password":"'+password+'"}', function(data,status){
+        var obj = jQuery.parseJSON(data);
+        if(typeof obj != 'null' && obj.hasOwnProperty('error') && obj.error.code == '401'){
+            var pass = prompt("目录加密，请输入密码","");
+            localStorage.setItem('password'+path, pass);
+            if(pass != null && pass != ""){
+                list(path);
+            }else{
+                history.go(-1);
+            }
+        }else if(typeof obj != 'null'){
+            list_files(path,obj.files);
+        }
+    });
+}
+
+function list_files(path,files){
+    html = "";
+    for(i in files){
+        var item = files[i];
+        var p = path+item.name+'/';
+        if(item['size']==undefined){
+            item['size'] = "";
+        }
+
+        item['modifiedTime'] = utc2beijing(item['modifiedTime']);
+        item['size'] = formatFileSize(item['size']);
+        if(item['mimeType'] == 'application/vnd.google-apps.folder'){
+            html +=`<li class="mdui-list-item mdui-ripple"><a href="${p}" class="folder">
+	            <div class="mdui-col-xs-12 mdui-col-sm-7 mdui-text-truncate">
+	            <i class="mdui-icon material-icons">folder_open</i>
+	              ${item.name}
+	            </div>
+	            <div class="mdui-col-sm-3 mdui-text-right">${item['modifiedTime']}</div>
+	            <div class="mdui-col-sm-2 mdui-text-right">${item['size']}</div>
+	            </a>
+	        </li>`;
+        }else{
+            var p = path+item.name;
+            if(item.name == "README.md"){
+                 get_file(p, item, function(data){
+                    markdown("#readme_md",data);
+                });
+            }
+            if(item.name == "HEAD.md"){
+	            get_file(p, item, function(data){
+                    markdown("#head_md",data);
+                });
+            }
+            html += `<li class="mdui-list-item file mdui-ripple" target="_blank"><a gd-type="${item.mimeType}" href="${p}" class="file">
+	          <div class="mdui-col-xs-12 mdui-col-sm-7 mdui-text-truncate">
+	          <i class="mdui-icon material-icons">insert_drive_file</i>
+	            ${item.name}
+	          </div>
+	          <div class="mdui-col-sm-3 mdui-text-right">${item['modifiedTime']}</div>
+	          <div class="mdui-col-sm-2 mdui-text-right">${item['size']}</div>
+	          </a>
+	      </li>`;
+        }
+    }
+    $('#list').html(html);
+}
+
+
+function get_file(path, file, callback){
+	var key = "file_path_"+path+file['modifiedTime'];
+	var data = localStorage.getItem(key);
+	if(data != undefined){
+		return callback(data);
+	}else{
+		$.get(path, function(d){
+			localStorage.setItem(key, d);
+            callback(d);
+        });
+	}
 }
 
 // 文件预览
@@ -153,79 +236,6 @@ function file_preview(a) {
     return true;
 }
 
-// 渲染文件列表
-function list(path){
-    var password = localStorage.getItem('password'+path);
-    $('#list').html(`<div class="mdui-progress"><div class="mdui-progress-indeterminate"></div></div>`);
-    $('#readme_md').hide().html('');
-    $('#head_md').hide().html('');
-    $.post(path,'{"password":"'+password+'"}', function(data,status){
-        var obj = jQuery.parseJSON(data);
-        if(typeof obj != 'null' && obj.hasOwnProperty('error') && obj.error.code == '401'){
-            var pass = prompt("目录加密，请输入密码","");
-            localStorage.setItem('password'+path, pass);
-            if(pass != null && pass != ""){
-                list(path);
-            }else{
-                alert("输入密码为空!");
-            }
-        }else if(typeof obj != 'null'){
-            list_files(path,obj.files);
-        }
-    });
-}
-
-function list_files(path,files){
-    html = "";
-    for(i in files){
-        var item = files[i];
-        var p = path+item.name+'/';
-        if(item['size']==undefined){
-            item['size'] = "";
-        }
-
-        item['modifiedTime'] = utc2beijing(item['modifiedTime']);
-        item['size'] = formatFileSize(item['size']);
-        if(item['mimeType'] == 'application/vnd.google-apps.folder'){
-            html +=`<li class="mdui-list-item mdui-ripple"><a href="${p}" class="folder">
-	            <div class="mdui-col-xs-12 mdui-col-sm-7 mdui-text-truncate">
-	            <i class="mdui-icon material-icons">folder_open</i>
-	              ${item.name}
-	            </div>
-	            <div class="mdui-col-sm-3 mdui-text-right">${item['modifiedTime']}</div>
-	            <div class="mdui-col-sm-2 mdui-text-right">${item['size']}</div>
-	            </a>
-	        </li>`;
-        }else{
-            var p = path+item.name;
-            if(item.name == "README.md"){
-                $.get(p, function(data){
-                    markdown("#readme_md",data);
-                });
-            }
-            if(item.name == "HEAD.md"){
-                $.get(p, function(data){
-                    markdown("#head_md",data);
-                });
-            }
-            html += `<li class="mdui-list-item file mdui-ripple" target="_blank"><a gd-type="${item.mimeType}" href="${p}">
-	          <div class="mdui-col-xs-12 mdui-col-sm-7 mdui-text-truncate">
-	          <i class="mdui-icon material-icons">insert_drive_file</i>
-	            ${item.name}
-	          </div>
-	          <div class="mdui-col-sm-3 mdui-text-right">${item['modifiedTime']}</div>
-	          <div class="mdui-col-sm-2 mdui-text-right">${item['size']}</div>
-	          </a>
-	      </li>`;
-        }
-    }
-    $('#list').html(html);
-    $("body").off("click").on("click", "a", function() {
-        return file_preview(this);
-    });
-}
-
-
 //时间转换
 function utc2beijing(utc_datetime) {
     // 转为正常的时间格式 年-月-日 时:分:秒
@@ -275,25 +285,14 @@ String.prototype.trim = function (char) {
     return this.replace(/^\s+|\s+$/g, '');
 };
 
-$(function(){
-    init();
-    var path = window.location.pathname;
-    $("body").on("click",'.folder',function(){
-        var url = $(this).attr('href');
-        history.pushState(null, null, url);
-        render(url);
-        return false;
-    });
-    render(path);
-});
 
 // README.md HEAD.md 支持
 function markdown(el, data){
     if(window.md == undefined){
-        $.getScript('https://cdn.jsdelivr.net/npm/markdown-it@9.1.0/dist/markdown-it.min.js',function(){
-            window.md = window.markdownit();
-            markdown(el, data);
-        });
+        //$.getScript('https://cdn.jsdelivr.net/npm/markdown-it@9.1.0/dist/markdown-it.min.js',function(){
+        window.md = window.markdownit();
+        markdown(el, data);
+        //});
     }else{
         var html = md.render(data);
         $(el).show().html(html);
@@ -305,3 +304,20 @@ window.onpopstate = function(){
     var path = window.location.pathname;
     render(path);
 }
+
+
+$(function(){
+    init();
+    var path = window.location.pathname;
+    $("body").on("click",'.folder',function(){
+        var url = $(this).attr('href');
+        history.pushState(null, null, url);
+        render(url);
+        return false;
+    });
+
+    $("body").on("click", ".file", function() {
+        return file_preview(this);
+    });
+    render(path);
+});
