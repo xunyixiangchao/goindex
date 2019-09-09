@@ -31,3 +31,16 @@ Google Drive Directory Index
   
 程序文件中 `root_pass` 只为根目录密码，优先于 `.password` 文件  
 
+
+## 更新日志  
+1.0.2  
+优化前端逻辑  
+添加文件预览功能(临时)  
+添加前端文件缓存功能  
+  
+1.0.1  
+添加 README.md 、 HEAD.md 支持  
+  
+1.0.0  
+前后端分离，确定基本架构  
+添加.password 支持  
