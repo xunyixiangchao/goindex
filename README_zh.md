@@ -1,10 +1,10 @@
-# goindex
-Google Drive Directory Index
+![GoIndex](https://raw.githubusercontent.com/donwa/goindex/master/themes/logo.png)  
 
-## 功能：
-部署在 CloudFlare Workers的小程序。  
-可以将 Google Drive 文件以目录形式列出，并直连下载。  
-流量走 CloudFlare ，网速由 CloudFlare 决定。
+GoIndex  
+====  
+基于 [Cloudflare Workers](https://workers.cloudflare.com/) 和 [Google Drive](https://www.google.com/drive/) 的功能，你可以部署你的代码在Cloudflare Workers，实现以目录形式展示google drive中的文件。
+
+`index.js` 包含 Workers 所需的代码.  
 
 ## Demo
 [https://index.gd.workers.dev/](https://index.gd.workers.dev/)  
@@ -16,7 +16,6 @@ Google Drive Directory Index
 3、执行 rclone config file 查看 rclone.conf 路径。找到root_folder_id和refresh_token记录下来。  
 4、下载 https://github.com/donwa/goindex 中的 index.js  并填入 root 和 refresh_token  
 5、复制代码 到 CloudFlare 部署。  
-
 
 ## 安装部署方案2  
 作者不会记录refresh_token，但为避免纠纷，建议有条件的同学使用方案1进行部署  
