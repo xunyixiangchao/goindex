@@ -33,6 +33,9 @@ Google Drive Directory Index
 
 
 ## 更新日志  
+1.0.3  
+修复 `.password` 绕过下载问题。  
+
 1.0.2  
 优化前端逻辑  
 添加文件预览功能(临时)  
