@@ -49,7 +49,7 @@ async function handleRequest(request) {
     if(path.substr(-1) == '/' || action != null){
       return new Response(html,{status:200,headers:{'Content-Type':'text/html; charset=utf-8'}});
     }else{
-      if(path.split('/').pop() == ".password"){
+      if(path.split('/').pop().toLowerCase() == ".password"){
          return new Response("",{status:404});
       }
       let file = await gd.file(path);
