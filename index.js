@@ -120,7 +120,7 @@ class googleDrive {
     async _file(path){
       let arr = path.split('/');
       let name = arr.pop();
-      name = decodeURIComponent(name);
+      name = decodeURIComponent(name).replace(/\'/g, "\\'");
       let dir = arr.join('/')+'/';
       console.log(name, dir);
       let parent = await this.findPathId(dir);
@@ -205,7 +205,7 @@ class googleDrive {
     }
 
     async _findDirId(parent, name){
-      name = decodeURIComponent(name);
+      name = decodeURIComponent(name).replace(/\'/g, "\\'");
       
       console.log("_findDirId",parent,name);
 
