@@ -6,9 +6,11 @@ GoIndex
 
 `index.js` 包含 Workers 所需的代码.  
 
-## Demo
+## Demo  
+material:  
 [https://index.gd.workers.dev/](https://index.gd.workers.dev/)  
-
+classic:  
+[https://indexc.gd.workers.dev/](https://indexc.gd.workers.dev/)  
 
 ## 安装部署方案1  
 1、在本地安装 rclone   
