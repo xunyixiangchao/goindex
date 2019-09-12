@@ -12,40 +12,20 @@ function init(){
    <div id="nav" class="mdui-toolbar mdui-container"> 
    </div> 
 </header>
-<div class="mdui-container"> 
-	<div id="head_md" class="mdui-typo" style="display:none;padding: 20px 0;"></div>
-
-	 <div class="mdui-row"> 
-	  <ul class="mdui-list"> 
-	   <li class="mdui-list-item th"> 
-	    <div class="mdui-col-xs-12 mdui-col-sm-7">
-	     文件
-	    </div> 
-	    <div class="mdui-col-sm-3 mdui-text-right">
-	     修改时间
-	    </div> 
-	    <div class="mdui-col-sm-2 mdui-text-right">
-	     大小
-	    </div> 
-	    </li> 
-	  </ul> 
-	 </div> 
-	 <div class="mdui-row"> 
-	  <ul id="list" class="mdui-list"> 
-	  </ul> 
-	 </div>
-
-	 <div id="readme_md" class="mdui-typo" style="display:none; padding: 20px 0;"></div>
+<div id="content" class="mdui-container"> 
 </div>
-
-`;
+	`;
     $('body').html(html);
 }
 
 function render(path){
     title(path);
     nav(path);
-    list(path);
+    if(path.substr(-1) == '/'){
+    	list(path);
+    }else{
+	    file(path);
+    }
 }
 
 
@@ -77,6 +57,32 @@ function nav(path){
 
 // 渲染文件列表
 function list(path){
+	var content = `
+	<div id="head_md" class="mdui-typo" style="display:none;padding: 20px 0;"></div>
+
+	 <div class="mdui-row"> 
+	  <ul class="mdui-list"> 
+	   <li class="mdui-list-item th"> 
+	    <div class="mdui-col-xs-12 mdui-col-sm-7">
+	     文件
+	    </div> 
+	    <div class="mdui-col-sm-3 mdui-text-right">
+	     修改时间
+	    </div> 
+	    <div class="mdui-col-sm-2 mdui-text-right">
+	     大小
+	    </div> 
+	    </li> 
+	  </ul> 
+	 </div> 
+	 <div class="mdui-row"> 
+	  <ul id="list" class="mdui-list"> 
+	  </ul> 
+	 </div>
+	 <div id="readme_md" class="mdui-typo" style="display:none; padding: 20px 0;"></div>
+	`;
+	$('#content').html(content);
+	
     var password = localStorage.getItem('password'+path);
     $('#list').html(`<div class="mdui-progress"><div class="mdui-progress-indeterminate"></div></div>`);
     $('#readme_md').hide().html('');
@@ -130,6 +136,10 @@ function list_files(path,files){
                     markdown("#head_md",data);
                 });
             }
+            var ext = p.split('.').pop();
+            if("|html|php|css|go|java|js|json|txt|sh|md|mp4|bmp|jpg|jpeg|png|gif|".indexOf(`|${ext}|`) >= 0){
+	            p += "?a=view";
+            }
             html += `<li class="mdui-list-item file mdui-ripple" target="_blank"><a gd-type="${item.mimeType}" href="${p}" class="file">
 	          <div class="mdui-col-xs-12 mdui-col-sm-7 mdui-text-truncate">
 	          <i class="mdui-icon material-icons">insert_drive_file</i>
@@ -158,83 +168,130 @@ function get_file(path, file, callback){
 	}
 }
 
-// 文件预览
-var previewDom, previewUrl;
-function file_preview(a) {
-    var fileUrl = a.href;
-    if(fileUrl == previewUrl) {
-        previewDom.remove();
-        previewUrl = "";
-        return false;
-    }
-    if(previewDom !== undefined)
-    {
-        previewDom.remove();
-    }
-    var preview = `<div class="mdui-card">
-        <div class="mdui-card-media">
-            previewHtml
-            <div class="mdui-card-menu">
-              <button id="fileDownload" class="mdui-btn mdui-btn-icon mdui-text-color-white"><i class="mdui-icon material-icons">file_download</i></button>
-              <button id="previewClose" class="mdui-btn mdui-btn-icon mdui-text-color-white"><i class="mdui-icon material-icons">close</i></button>
-            </div>
-        </div>
-    </div>`;
 
-    var fileType = $(a).attr("gd-type");
-    var isPreview;
-    switch (fileType){
-        case "video/mp4":
-        case "video/x-matroska": // .mkv
-        case "video/quicktime": // .mov
-            isPreview = true;
-            preview = preview.replace("previewHtml", `<video class="mdui-video-fluid" controls src="${fileUrl}"></video>`);
-            break;
-        case "image/jpeg":
-        case "image/gif":
-        case "image/png":
-            isPreview = true;
-            preview = `<div id="progressBar" class="mdui-progress"><div class="mdui-progress-indeterminate"></div></div>` + preview;
-            preview = $(preview.replace("previewHtml", `<img class="mdui-img-fluid" src="${fileUrl}"/>`));
-            preview.find("img")[0].onload = function(){
-                $("#progressBar").remove();
-            }
-            break;
-        case "text/markdown":
-        case "text/plain":
-            var mdName = fileUrl.split('/').pop();
-            if(mdName !== "HEAD.md" && mdName !== "README.md") {
-                isPreview = true;
-                preview = `<div id="progressBar" class="mdui-progress"><div class="mdui-progress-indeterminate"></div></div>` + preview;
-                preview = $(preview.replace("previewHtml", `<div id="markdownShow" class="mdui-typo" style="padding: 20px;"></div>`));
-                $.get(fileUrl, function(data){
-                    markdown("#markdownShow",data);
-                    $("#progressBar").remove();
-                });
-            }
-            break;
-    }
-    if(isPreview) {
-        previewUrl = fileUrl;
-        previewDom = $(preview);
-        previewDom.on("click", "#fileDownload", function () {
-            var downForm = $('<form method="GET"></form>');
-            downForm.attr('action', fileUrl);
-            downForm.appendTo(previewDom);
-            downForm.submit();
-        });
-        previewDom.on("click", "#previewClose", function () {
-            if(previewDom !== undefined)
-            {
-                previewDom.remove();
-            }
-            previewUrl = "";
-        });
-        $(a).parent().after(previewDom);
-        return false;
-    }
-    return true;
+
+// 文件展示 ?a=view
+function file(path){
+	var name = path.split('/').pop();
+	var ext = name.split('.').pop().toLowerCase().replace(`?a=view`,"");
+	if("|html|php|css|go|java|js|json|txt|sh|md|".indexOf(`|${ext}|`) >= 0){
+		return file_code(path);
+	}
+
+	if("|mp4|".indexOf(`|${ext}|`) >= 0){
+		return file_video(path);
+	}
+
+	if("|bmp|jpg|jpeg|png|gif|".indexOf(`|${ext}|`) >= 0){
+		return file_image(path);
+	}
 }
+
+// 文件展示 |html|php|css|go|java|js|json|txt|sh|md|
+function file_code(path){
+	var type = {
+		"html":"html",
+		"php":"php",
+		"css":"css",
+		"go":"golang",
+		"java":"java",
+		"js":"javascript",
+		"json":"json",
+		"txt":"Text",
+		"sh":"sh",
+		"md":"Markdown",	
+	};
+	var name = path.split('/').pop();
+	var ext = name.split('.').pop();
+	var href = window.location.origin + path;
+	var content = `
+<div class="mdui-container">
+<pre id="editor" ></pre>
+</div>
+<div class="mdui-textfield">
+	<label class="mdui-textfield-label">下载地址</label>
+	<input class="mdui-textfield-input" type="text" value="${href}"/>
+</div>
+<a href="${href}" class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent"><i class="mdui-icon material-icons">file_download</i></a>
+
+<script src="https://cdn.bootcss.com/ace/1.2.9/ace.js"></script>
+<script src="https://cdn.bootcss.com/ace/1.2.9/ext-language_tools.js"></script>
+	`;
+	$('#content').html(content);
+	
+	$.get(path, function(data){
+		$('#editor').html($('<div/>').text(data).html());
+		var code_type = "Text";
+		if(type[ext] != undefined ){
+			code_type = type[ext];
+		}
+		var editor = ace.edit("editor");
+	    editor.setTheme("ace/theme/ambiance");
+	    editor.setFontSize(18);
+	    editor.session.setMode("ace/mode/"+code_type);
+	    
+	    //Autocompletion
+	    editor.setOptions({
+	        enableBasicAutocompletion: true,
+	        enableSnippets: true,
+	        enableLiveAutocompletion: true,
+	        maxLines: Infinity
+	    });
+	});
+}
+
+// 文件展示 mp4
+function file_video(path){
+	var url = window.location.origin + path;
+	var content = `
+<div class="mdui-container-fluid">
+	<br>
+	<video class="mdui-video-fluid mdui-center" preload controls poster="<?php @e($item['thumb']);?>">
+	  <source src="${url}" type="video/mp4">
+	</video>
+	<br>
+	<!-- 固定标签 -->
+	<div class="mdui-textfield">
+	  <label class="mdui-textfield-label">下载地址</label>
+	  <input class="mdui-textfield-input" type="text" value="${url}"/>
+	</div>
+	<div class="mdui-textfield">
+	  <label class="mdui-textfield-label">引用地址</label>
+	  <textarea class="mdui-textfield-input"><video><source src="${url}" type="video/mp4"></video></textarea>
+	</div>
+</div>
+<a href="${url}" class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent"><i class="mdui-icon material-icons">file_download</i></a>
+	`;
+	$('#content').html(content);
+}
+
+//
+function file_image(path){
+	var url = window.location.origin + path;
+	var content = `
+<div class="mdui-container-fluid">
+	<br>
+	<img class="mdui-img-fluid" src="${url}"/>
+	<br>
+	<div class="mdui-textfield">
+	  <label class="mdui-textfield-label">下载地址</label>
+	  <input class="mdui-textfield-input" type="text" value="${url}"/>
+	</div>
+	<div class="mdui-textfield">
+	  <label class="mdui-textfield-label">HTML 引用地址</label>
+	  <input class="mdui-textfield-input" type="text" value="<img src='${url}' />"/>
+	</div>
+        <div class="mdui-textfield">
+	  <label class="mdui-textfield-label">Markdown 引用地址</label>
+	  <input class="mdui-textfield-input" type="text" value="![](${url})"/>
+	</div>
+        <br>
+</div>
+<a href="${url}" class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent"><i class="mdui-icon material-icons">file_download</i></a>
+	`;
+	$('#content').html(content);
+}
+
 
 //时间转换
 function utc2beijing(utc_datetime) {
@@ -315,9 +372,6 @@ $(function(){
         render(url);
         return false;
     });
-
-    $("body").on("click", ".file", function() {
-        return file_preview(this);
-    });
+    
     render(path);
 });
