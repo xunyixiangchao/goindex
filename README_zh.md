@@ -6,9 +6,11 @@ GoIndex
 
 `index.js` 包含 Workers 所需的代码.  
 
-## Demo
+## Demo  
+material:  
 [https://index.gd.workers.dev/](https://index.gd.workers.dev/)  
-
+classic:  
+[https://indexc.gd.workers.dev/](https://indexc.gd.workers.dev/)  
 
 ## 安装部署方案1  
 1、在本地安装 rclone   
@@ -32,6 +34,16 @@ GoIndex
 
 
 ## 更新日志  
+
+1.0.6  
+添加 classic 模板  
+
+1.0.5  
+添加文件展示页  
+
+1.0.4  
+修复 注入问题。  
+
 1.0.3  
 修复 `.password` 绕过下载问题。  
 
