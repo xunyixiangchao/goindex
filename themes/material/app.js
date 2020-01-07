@@ -280,7 +280,7 @@ function file_audio(path){
 	var content = `
 <div class="mdui-container-fluid">
 	<br>
-	<audio class="mdui-video-fluid mdui-center" preload controls>
+	<audio class="mdui-center" preload controls>
 	  <source src="${url}"">
 	</audio>
 	<br>
