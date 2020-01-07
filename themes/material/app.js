@@ -186,6 +186,10 @@ function file(path){
 	if("|mp4|".indexOf(`|${ext}|`) >= 0){
 		return file_video(path);
 	}
+	
+	if("|mp3|wav|ogg|m4a|".indexOf(`|${ext}|`) >= 0){
+		return file_audio(path);
+	}
 
 	if("|bmp|jpg|jpeg|png|gif|".indexOf(`|${ext}|`) >= 0){
 		return file_image(path);
@@ -270,7 +274,7 @@ function file_video(path){
 	$('#content').html(content);
 }
 
-// 文件展示 音频
+// 文件展示 音频 mp3/m4a/wav/ogg
 function file_audio(path){
 	var url = window.location.origin + path;
 	var content = `
