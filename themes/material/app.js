@@ -141,7 +141,7 @@ function list_files(path,files){
                 });
             }
             var ext = p.split('.').pop();
-            if("|html|php|css|go|java|js|json|txt|sh|md|mp4|bmp|jpg|jpeg|png|gif|m4a|mp3|wav|ogg|".indexOf(`|${ext}|`) >= 0){
+            if("|html|php|css|go|java|js|json|txt|sh|md|mp4|bmp|jpg|jpeg|png|gif|m4a|mp3|wav|ogg|webm|avi|".indexOf(`|${ext}|`) >= 0){
 	            p += "?a=view";
 	            c += " view";
             }
@@ -183,7 +183,7 @@ function file(path){
 		return file_code(path);
 	}
 
-	if("|mp4|".indexOf(`|${ext}|`) >= 0){
+	if("|mp4|webm|avi|".indexOf(`|${ext}|`) >= 0){
 		return file_video(path);
 	}
 	
@@ -249,7 +249,7 @@ function file_code(path){
 	});
 }
 
-// 文件展示 mp4
+// 文件展示 视频 |mp4|webm|avi|
 function file_video(path){
 	var url = window.location.origin + path;
 	var content = `
@@ -274,7 +274,7 @@ function file_video(path){
 	$('#content').html(content);
 }
 
-// 文件展示 音频 mp3/m4a/wav/ogg
+// 文件展示 音频 |mp3|m4a|wav|ogg|
 function file_audio(path){
 	var url = window.location.origin + path;
 	var content = `
