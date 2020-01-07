@@ -186,8 +186,12 @@ function file(path){
 		return file_code(path);
 	}
 
-	if("|mp4|webm|avi|".indexOf(`|${ext}|`) >= 0){
+	if("|mp4|webm|mpg|mpeg|mkv|".indexOf(`|${ext}|`) >= 0){
 		return file_video(path);
+	}
+	
+	if("|avi|rm|rmvb|mov|wmv|asf|ts|flv|".indexOf(`|${ext}|`) >= 0){
+		return file_dpvideo(path);
 	}
 	
 	if("|mp3|wav|ogg|m4a|".indexOf(`|${ext}|`) >= 0){
@@ -272,6 +276,42 @@ function file_video(path){
 	  <textarea class="mdui-textfield-input"><video><source src="${url}" type="video/mp4"></video></textarea>
 	</div>
 </div>
+<a href="${url}" class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent"><i class="mdui-icon material-icons">file_download</i></a>
+	`;
+	$('#content').html(content);
+}
+
+// 文件展示 视频 |avi|rm|rmvb|mov|wmv|asf|ts|flv|
+function file_dpvideo(path){
+	var url = window.location.origin + path;
+	var content = `
+<link class="dplayer-css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.css">
+<div class="mdui-container-fluid">
+	<br>
+	<div id="dplayer"></div>
+	<br>
+	<!-- 固定标签 -->
+	<div class="mdui-textfield">
+	  <label class="mdui-textfield-label">下载地址</label>
+	  <input class="mdui-textfield-input" type="text" value="${url}"/>
+	</div>
+	<div class="mdui-textfield">
+	  <label class="mdui-textfield-label">HTML 引用地址</label>
+	  <textarea class="mdui-textfield-input"><video><source src="${url}"></video></textarea>
+	</div>
+	</div>
+	<!-- 初始化播放器 -->
+	<script src="https://cdn.jsdelivr.net/npm/flv.js/dist/flv.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js"></script>
+	<script>
+	const dp = new DPlayer({
+	container: document.getElementById('dplayer'),
+	lang:'zh-cn',
+	video: {
+	    url: '$<url>',
+	}
+});
+</script>
 <a href="${url}" class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent"><i class="mdui-icon material-icons">file_download</i></a>
 	`;
 	$('#content').html(content);
