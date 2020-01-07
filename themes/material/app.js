@@ -68,12 +68,15 @@ function list(path){
 	   <li class="mdui-list-item th"> 
 	    <div class="mdui-col-xs-12 mdui-col-sm-7">
 	     文件
+	<i class="mdui-icon material-icons icon-sort" data-sort="name" data-order="more">expand_more</i>
 	    </div> 
 	    <div class="mdui-col-sm-3 mdui-text-right">
 	     修改时间
+	<i class="mdui-icon material-icons icon-sort" data-sort="date" data-order="downward">expand_more</i>
 	    </div> 
 	    <div class="mdui-col-sm-2 mdui-text-right">
 	     大小
+	<i class="mdui-icon material-icons icon-sort" data-sort="size" data-order="downward">expand_more</i>
 	    </div> 
 	    </li> 
 	  </ul> 
@@ -141,7 +144,7 @@ function list_files(path,files){
                 });
             }
             var ext = p.split('.').pop();
-            if("|html|php|css|go|java|js|json|txt|sh|md|mp4|bmp|jpg|jpeg|png|gif|m4a|mp3|wav|ogg|".indexOf(`|${ext}|`) >= 0){
+            if("|html|php|css|go|java|js|json|txt|sh|md|mp4|bmp|jpg|jpeg|png|gif|m4a|mp3|wav|ogg|webm|avi|".indexOf(`|${ext}|`) >= 0){
 	            p += "?a=view";
 	            c += " view";
             }
@@ -183,7 +186,7 @@ function file(path){
 		return file_code(path);
 	}
 
-	if("|mp4|".indexOf(`|${ext}|`) >= 0){
+	if("|mp4|webm|avi|".indexOf(`|${ext}|`) >= 0){
 		return file_video(path);
 	}
 	
@@ -249,7 +252,7 @@ function file_code(path){
 	});
 }
 
-// 文件展示 mp4
+// 文件展示 视频 |mp4|webm|avi|
 function file_video(path){
 	var url = window.location.origin + path;
 	var content = `
@@ -265,7 +268,7 @@ function file_video(path){
 	  <input class="mdui-textfield-input" type="text" value="${url}"/>
 	</div>
 	<div class="mdui-textfield">
-	  <label class="mdui-textfield-label">引用地址</label>
+	  <label class="mdui-textfield-label">HTML 引用地址</label>
 	  <textarea class="mdui-textfield-input"><video><source src="${url}" type="video/mp4"></video></textarea>
 	</div>
 </div>
@@ -274,13 +277,13 @@ function file_video(path){
 	$('#content').html(content);
 }
 
-// 文件展示 音频 mp3/m4a/wav/ogg
+// 文件展示 音频 |mp3|m4a|wav|ogg|
 function file_audio(path){
 	var url = window.location.origin + path;
 	var content = `
 <div class="mdui-container-fluid">
 	<br>
-	<audio class="mdui-video-fluid mdui-center" preload controls>
+	<audio class="mdui-center" preload controls>
 	  <source src="${url}"">
 	</audio>
 	<br>
@@ -290,7 +293,7 @@ function file_audio(path){
 	  <input class="mdui-textfield-input" type="text" value="${url}"/>
 	</div>
 	<div class="mdui-textfield">
-	  <label class="mdui-textfield-label">引用地址</label>
+	  <label class="mdui-textfield-label">HTML 引用地址</label>
 	  <textarea class="mdui-textfield-input"><audio><source src="${url}"></audio></textarea>
 	</div>
 </div>
@@ -313,7 +316,7 @@ function file_image(path){
 	  <input class="mdui-textfield-input" type="text" value="${url}"/>
 	</div>
 	<div class="mdui-textfield">
-	  <label class="mdui-textfield-label">HTML 引用地址</label>
+	  <label class="mdui-textfield-label">HTML 引用</label>
 	  <input class="mdui-textfield-input" type="text" value="<img src='${url}' />"/>
 	</div>
         <div class="mdui-textfield">
