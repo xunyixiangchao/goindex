@@ -191,6 +191,7 @@ function file(path){
 	}
 	
 	if("|avi|rm|rmvb|mov|wmv|asf|ts|flv|mkv|".indexOf(`|${ext}|`) >= 0){
+		doucument.write('<script src="https://cdn.jsdelivr.net/npm/flv.js/dist/flv.min.js"></script><script src="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js"></script>');
 		return file_dpvideo(path);
 	}
 	
@@ -281,13 +282,11 @@ function file_video(path){
 	$('#content').html(content);
 }
 
-// 文件展示 视频 |avi|rm|rmvb|mov|wmv|asf|ts|flv|mkv|
+// 文件展示 视频 DPlayer |avi|rm|rmvb|mov|wmv|asf|ts|flv|mkv|
 function file_dpvideo(path){
 	var url = window.location.origin + path;
 	var content = `
-<link class="dplayer-css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flv.js/dist/flv.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js"></script>
+	<link class="dplayer-css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.css">
 <div class="mdui-container-fluid">
 	<br>
 	<div id="dplayer"></div>
