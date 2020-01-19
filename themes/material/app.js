@@ -286,6 +286,8 @@ function file_dpvideo(path){
 	var url = window.location.origin + path;
 	var content = `
 <link class="dplayer-css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flv.js/dist/flv.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js"></script>
 <div class="mdui-container-fluid">
 	<br>
 	<div id="dplayer"></div>
@@ -301,15 +303,14 @@ function file_dpvideo(path){
 	</div>
 	</div>
 	<!-- 初始化播放器 -->
-	<script src="https://cdn.jsdelivr.net/npm/flv.js/dist/flv.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js"></script>
+	
 	<script>
 	const dp = new DPlayer({
 	container: document.getElementById('dplayer'),
 	lang:'zh-cn',
 	video: {
 	url: '${url}',
-	}
+	},
 });
 </script>
 <a href="${url}" class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent"><i class="mdui-icon material-icons">file_download</i></a>
