@@ -308,7 +308,7 @@ function file_dpvideo(path){
 	container: document.getElementById('dplayer'),
 	lang:'zh-cn',
 	video: {
-	    url: '$<url>',
+	url: '${url}',
 	}
 });
 </script>
