@@ -2,8 +2,9 @@
 document.write('<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/mdui@0.4.3/dist/css/mdui.min.css">');
 // markdown支持
 document.write('<script src="//cdn.jsdelivr.net/npm/markdown-it@10.0.0/dist/markdown-it.min.js"></script>');
+
 document.write('<style>.mdui-appbar .mdui-toolbar{height:56px;font-size:1pc}.mdui-toolbar>*{padding:0 6px;margin:0 2px}.mdui-toolbar>i{opacity:.5}.mdui-toolbar>.mdui-typo-headline{padding:0 1pc 0 0}.mdui-toolbar>i{padding:0}.mdui-toolbar>a:hover,a.active,a.mdui-typo-headline{opacity:1}.mdui-container{max-width:980px}.mdui-list-item{transition:none}.mdui-list>.th{background-color:initial}.mdui-list-item>a{width:100%;line-height:3pc}.mdui-list-item{margin:2px 0;padding:0}.mdui-toolbar>a:last-child{opacity:1}@media screen and (max-width:980px){.mdui-list-item .mdui-text-right{display:none}.mdui-container{width:100%!important;margin:0}.mdui-toolbar>.mdui-typo-headline,.mdui-toolbar>a:last-child,.mdui-toolbar>i:first-child{display:block}}</style>');
-// 初始化页面，并载入必要资源
+// 初始化页面, 并载入必要资源
 function init(){
     document.siteName = $('title').html();
     $('body').addClass("mdui-theme-primary-blue-grey mdui-theme-accent-blue");
@@ -144,7 +145,7 @@ function list_files(path,files){
                 });
             }
             var ext = p.split('.').pop();
-            if("|html|php|css|go|java|js|json|txt|sh|md|mp4|bmp|jpg|jpeg|png|gif|webp|m4a|mp3|wav|ogg|webm|avi|rm|rmvb|mov|wmv|asf|ts|flv|".indexOf(`|${ext}|`) >= 0){
+            if("|html|php|css|go|java|js|json|txt|sh|md|mp4|bmp|jpg|jpeg|png|gif|webp|m4a|mp3|wav|ogg|webm|avi|rm|rmvb|mov|wmv|asf|ts|flv|f4v|m3u8|m4s|mpd|".indexOf(`|${ext}|`) >= 0){
 	            p += "?a=view";
 	            c += " view";
             }
@@ -190,9 +191,34 @@ function file(path){
 		return file_video(path);
 	}
 	
-	if("|avi|rm|rmvb|mov|wmv|asf|ts|flv|mkv|".indexOf(`|${ext}|`) >= 0){
-		doucument.write('<script src="https://cdn.jsdelivr.net/npm/flv.js/dist/flv.min.js"></script><script src="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js"></script>');
+	if("|avi|rm|rmvb|mov|wmv|asf|mkv|".indexOf(`|${ext}|`) >= 0){
+		$.getScript('//cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js',function(){
 		return file_dpvideo(path);
+		});
+	}
+	
+	if("|flv|f4v|".indexOf(`|${ext}|`) >= 0){
+		$.getScript('//cdn.jsdelivr.net/npm/flv.js/dist/flv.min.js',function(){
+			$.getScript('//cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js',function(){
+			return file_dpvideo(path);
+			});
+		});
+	}
+	
+	if("|m3u8|ts|".indexOf(`|${ext}|`) >= 0){
+		$.getScript('//cdn.jsdelivr.net/npm/hls.js/dist/hls.min.js',function(){
+			$.getScript('//cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js',function(){
+			return file_dpvideo(path);
+			});
+		});
+	}
+	
+	if("|m4s|mpd|".indexOf(`|${ext}|`) >= 0){
+		$.getScript('//cdn.jsdelivr.net/npm/dashjs/dist/dash.all.min.js',function(){
+			$.getScript('//cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js',function(){
+			return file_dpvideo(path);
+			});
+		});
 	}
 	
 	if("|mp3|wav|ogg|m4a|".indexOf(`|${ext}|`) >= 0){
@@ -282,12 +308,12 @@ function file_video(path){
 	$('#content').html(content);
 }
 
-// 文件展示 视频 DPlayer |avi|rm|rmvb|mov|wmv|asf|ts|flv|mkv|
+// 文件展示 视频 DPlayer |avi|rm|rmvb|mov|wmv|asf|ts|flv|f4v|m3u8|m4s|mpd|
 function file_dpvideo(path){
 	var url = window.location.origin + path;
 	var content = `
-	<link class="dplayer-css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.css">
-<div class="mdui-container-fluid">
+	<link class="dplayer-css" rel="stylesheet" href="//cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.css">
+	<div class="mdui-container-fluid">
 	<br>
 	<div id="dplayer"></div>
 	<br>
@@ -301,18 +327,17 @@ function file_dpvideo(path){
 	  <textarea class="mdui-textfield-input"><video><source src="${url}"></video></textarea>
 	</div>
 	</div>
-	<!-- 初始化播放器 -->
-	
 	<script>
+	// 初始化播放器
 	const dp = new DPlayer({
 	container: document.getElementById('dplayer'),
 	lang:'zh-cn',
 	video: {
 	url: '${url}',
 	},
-});
-</script>
-<a href="${url}" class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent"><i class="mdui-icon material-icons">file_download</i></a>
+	});
+	</script>
+	<a href="${url}" class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent"><i class="mdui-icon material-icons">file_download</i></a>
 	`;
 	$('#content').html(content);
 }
