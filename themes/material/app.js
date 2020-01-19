@@ -72,7 +72,7 @@ function list(path){
 	    </div> 
 	    <div class="mdui-col-sm-3 mdui-text-right">
 	     修改时间
-	<i class="mdui-icon material-icons icon-sort" data-sort="date" data-order="downward">expand_more</i>
+	<i class="mdui-icon material-icons icon-sort" data-sort="modifiedTime" data-order="downward">expand_more</i>
 	    </div> 
 	    <div class="mdui-col-sm-2 mdui-text-right">
 	     大小
@@ -144,7 +144,7 @@ function list_files(path,files){
                 });
             }
             var ext = p.split('.').pop();
-            if("|html|php|css|go|java|js|json|txt|sh|md|mp4|bmp|jpg|jpeg|png|gif|m4a|mp3|wav|ogg|webm|avi|".indexOf(`|${ext}|`) >= 0){
+            if("|html|php|css|go|java|js|json|txt|sh|md|mp4|bmp|jpg|jpeg|png|gif|webp|m4a|mp3|wav|ogg|webm|avi|rm|rmvb|mov|wmv|asf|ts|flv|".indexOf(`|${ext}|`) >= 0){
 	            p += "?a=view";
 	            c += " view";
             }
@@ -186,11 +186,11 @@ function file(path){
 		return file_code(path);
 	}
 
-	if("|mp4|webm|mpg|mpeg|mkv|".indexOf(`|${ext}|`) >= 0){
+	if("|mp4|webm|mpg|mpeg|".indexOf(`|${ext}|`) >= 0){
 		return file_video(path);
 	}
 	
-	if("|avi|rm|rmvb|mov|wmv|asf|ts|flv|".indexOf(`|${ext}|`) >= 0){
+	if("|avi|rm|rmvb|mov|wmv|asf|ts|flv|mkv|".indexOf(`|${ext}|`) >= 0){
 		return file_dpvideo(path);
 	}
 	
@@ -198,7 +198,7 @@ function file(path){
 		return file_audio(path);
 	}
 
-	if("|bmp|jpg|jpeg|png|gif|".indexOf(`|${ext}|`) >= 0){
+	if("|bmp|jpg|jpeg|png|gif|webp|".indexOf(`|${ext}|`) >= 0){
 		return file_image(path);
 	}
 }
@@ -256,7 +256,7 @@ function file_code(path){
 	});
 }
 
-// 文件展示 视频 |mp4|webm|avi|
+// 文件展示 视频 |mp4|webm|mpg|mpeg|
 function file_video(path){
 	var url = window.location.origin + path;
 	var content = `
@@ -272,8 +272,8 @@ function file_video(path){
 	  <input class="mdui-textfield-input" type="text" value="${url}"/>
 	</div>
 	<div class="mdui-textfield">
-	  <label class="mdui-textfield-label">HTML 引用地址</label>
-	  <textarea class="mdui-textfield-input"><video><source src="${url}" type="video/mp4"></video></textarea>
+	  <label class="mdui-textfield-label">HTML 引用</label>
+	  <textarea class="mdui-textfield-input"><video><source src="${url}"></video></textarea>
 	</div>
 </div>
 <a href="${url}" class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent"><i class="mdui-icon material-icons">file_download</i></a>
@@ -281,7 +281,7 @@ function file_video(path){
 	$('#content').html(content);
 }
 
-// 文件展示 视频 |avi|rm|rmvb|mov|wmv|asf|ts|flv|
+// 文件展示 视频 |avi|rm|rmvb|mov|wmv|asf|ts|flv|mkv|
 function file_dpvideo(path){
 	var url = window.location.origin + path;
 	var content = `
@@ -296,7 +296,7 @@ function file_dpvideo(path){
 	  <input class="mdui-textfield-input" type="text" value="${url}"/>
 	</div>
 	<div class="mdui-textfield">
-	  <label class="mdui-textfield-label">HTML 引用地址</label>
+	  <label class="mdui-textfield-label">HTML 引用</label>
 	  <textarea class="mdui-textfield-input"><video><source src="${url}"></video></textarea>
 	</div>
 	</div>
@@ -333,7 +333,7 @@ function file_audio(path){
 	  <input class="mdui-textfield-input" type="text" value="${url}"/>
 	</div>
 	<div class="mdui-textfield">
-	  <label class="mdui-textfield-label">HTML 引用地址</label>
+	  <label class="mdui-textfield-label">HTML 引用</label>
 	  <textarea class="mdui-textfield-input"><audio><source src="${url}"></audio></textarea>
 	</div>
 </div>
@@ -360,7 +360,7 @@ function file_image(path){
 	  <input class="mdui-textfield-input" type="text" value="<img src='${url}' />"/>
 	</div>
         <div class="mdui-textfield">
-	  <label class="mdui-textfield-label">Markdown 引用地址</label>
+	  <label class="mdui-textfield-label">Markdown 引用</label>
 	  <input class="mdui-textfield-input" type="text" value="![](${url})"/>
 	</div>
         <br>
