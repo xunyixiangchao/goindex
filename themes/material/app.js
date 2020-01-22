@@ -329,6 +329,7 @@ function file_dpvideo(path){
 	</div>
 	<script>
 	// 初始化播放器
+	if (typeof dp == "undefined"){
 	const dp = new DPlayer({
 	container: document.getElementById('dplayer'),
 	lang:'zh-cn',
@@ -336,6 +337,7 @@ function file_dpvideo(path){
 	url: '${url}',
 	},
 	});
+	}
 	</script>
 	<a href="${url}" class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent"><i class="mdui-icon material-icons">file_download</i></a>
 	`;
