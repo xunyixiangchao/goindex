@@ -145,7 +145,7 @@ function list_files(path,files){
                 });
             }
             var ext = p.split('.').pop();
-            if("|html|php|css|go|java|js|json|txt|sh|md|mp4|bmp|jpg|jpeg|png|gif|webp|m4a|mp3|wav|ogg|webm|avi|rm|rmvb|mov|wmv|asf|ts|flv|f4v|m3u8|m4s|mpd|".indexOf(`|${ext}|`) >= 0){
+            if("|html|php|css|go|java|js|json|txt|sh|md|mp4|webm|mov|mkv|mpg|mpeg|flv|f4v|m3u8|ts|m4s|mpd|mp3|wav|ogg|m4a|bmp|jpg|jpeg|png|gif|webp|".indexOf(`|${ext}|`) >= 0){
 	            p += "?a=view";
 	            c += " view";
             }
@@ -191,7 +191,7 @@ function file(path){
 		return file_video(path);
 	}
 	
-	if("|rm|rmvb|mov|wmv|asf|mkv|".indexOf(`|${ext}|`) >= 0){
+	if("|mov|mkv|mpg|mpeg|".indexOf(`|${ext}|`) >= 0){
 		$.getScript('//cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js',function(){
 		return file_dpvideo(path);
 		});
@@ -213,7 +213,7 @@ function file(path){
 		});
 	}
 	
-	if("|m4s|mpd|avi|".indexOf(`|${ext}|`) >= 0){
+	if("|m4s|mpd|".indexOf(`|${ext}|`) >= 0){
 		$.getScript('//cdn.jsdelivr.net/npm/dashjs/dist/dash.all.min.js',function(){
 			$.getScript('//cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js',function(){
 			return file_dpvideo(path);
@@ -283,7 +283,7 @@ function file_code(path){
 	});
 }
 
-// 文件展示 视频 |mp4|webm|mpg|mpeg|
+// 文件展示 视频 |mp4|webm|
 function file_video(path){
 	var url = window.location.origin + path;
 	var content = `
@@ -308,7 +308,7 @@ function file_video(path){
 	$('#content').html(content);
 }
 
-// 文件展示 视频 DPlayer |avi|rm|rmvb|mov|wmv|asf|ts|flv|f4v|m3u8|m4s|mpd|
+// 文件展示 视频 DPlayer |mov|mkv|mpg|mpeg|flv|f4v|m3u8|ts|m4s|mpd|
 function file_dpvideo(path){
 	var url = window.location.origin + path;
 	var content = `
@@ -431,9 +431,9 @@ function utc2beijing(utc_datetime) {
 
 // bytes自适应转换到KB,MB,GB
 function formatFileSize(bytes) {
-    if (bytes>=1000000000) {bytes=(bytes/1000000000).toFixed(2)+' GB';}
-    else if (bytes>=1000000)    {bytes=(bytes/1000000).toFixed(2)+' MB';}
-    else if (bytes>=1000)       {bytes=(bytes/1000).toFixed(2)+' KB';}
+    if (bytes>=1073741824) {bytes=(bytes/1073741824).toFixed(2)+' GB';}
+    else if (bytes>=1048576)    {bytes=(bytes/1048576).toFixed(2)+' MB';}
+    else if (bytes>=1024)       {bytes=(bytes/1024).toFixed(2)+' KB';}
     else if (bytes>1)           {bytes=bytes+' bytes';}
     else if (bytes==1)          {bytes=bytes+' byte';}
     else                        {bytes='';}
