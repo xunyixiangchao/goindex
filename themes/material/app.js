@@ -1,9 +1,10 @@
-// 在head 中 加载 必要静态
+// 在 head 中 加载必要静态
 document.write('<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/mdui@0.4.3/dist/css/mdui.min.css">');
 // markdown支持
 document.write('<script src="//cdn.jsdelivr.net/npm/markdown-it@10.0.0/dist/markdown-it.min.js"></script>');
+// mdui定义
 document.write('<style>.mdui-appbar .mdui-toolbar{height:56px;font-size:1pc}.mdui-toolbar>*{padding:0 6px;margin:0 2px}.mdui-toolbar>i{opacity:.5}.mdui-toolbar>.mdui-typo-headline{padding:0 1pc 0 0}.mdui-toolbar>i{padding:0}.mdui-toolbar>a:hover,a.active,a.mdui-typo-headline{opacity:1}.mdui-container{max-width:980px}.mdui-list-item{transition:none}.mdui-list>.th{background-color:initial}.mdui-list-item>a{width:100%;line-height:3pc}.mdui-list-item{margin:2px 0;padding:0}.mdui-toolbar>a:last-child{opacity:1}@media screen and (max-width:980px){.mdui-list-item .mdui-text-right{display:none}.mdui-container{width:100%!important;margin:0}.mdui-toolbar>.mdui-typo-headline,.mdui-toolbar>a:last-child,.mdui-toolbar>i:first-child{display:block}}</style>');
-// 初始化页面，并载入必要资源
+// 初始化页面, 并载入必要资源
 function init(){
     document.siteName = $('title').html();
     $('body').addClass("mdui-theme-primary-blue-grey mdui-theme-accent-blue");
@@ -72,7 +73,7 @@ function list(path){
 	    </div> 
 	    <div class="mdui-col-sm-3 mdui-text-right">
 	     修改时间
-	<i class="mdui-icon material-icons icon-sort" data-sort="date" data-order="downward">expand_more</i>
+	<i class="mdui-icon material-icons icon-sort" data-sort="modifiedTime" data-order="downward">expand_more</i>
 	    </div> 
 	    <div class="mdui-col-sm-2 mdui-text-right">
 	     大小
@@ -144,7 +145,7 @@ function list_files(path,files){
                 });
             }
             var ext = p.split('.').pop();
-            if("|html|php|css|go|java|js|json|txt|sh|md|mp4|bmp|jpg|jpeg|png|gif|m4a|mp3|wav|ogg|webm|avi|".indexOf(`|${ext}|`) >= 0){
+            if("|html|php|css|go|java|js|json|txt|sh|md|mp4|webm|mov|mkv|mpg|mpeg|flv|f4v|m3u8|ts|m4s|mpd|mp3|wav|ogg|m4a|bmp|jpg|jpeg|png|gif|webp|".indexOf(`|${ext}|`) >= 0){
 	            p += "?a=view";
 	            c += " view";
             }
@@ -186,15 +187,45 @@ function file(path){
 		return file_code(path);
 	}
 
-	if("|mp4|webm|avi|".indexOf(`|${ext}|`) >= 0){
+	if("|mp4|webm|".indexOf(`|${ext}|`) >= 0){
 		return file_video(path);
+	}
+	
+	if("|mov|mkv|mpg|mpeg|".indexOf(`|${ext}|`) >= 0){
+		$.getScript('//cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js',function(){
+		return file_dpvideo(path);
+		});
+	}
+	
+	if("|flv|f4v|".indexOf(`|${ext}|`) >= 0){
+		$.getScript('//cdn.jsdelivr.net/npm/flv.js/dist/flv.min.js',function(){
+			$.getScript('//cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js',function(){
+			return file_dpvideo(path);
+			});
+		});
+	}
+	
+	if("|m3u8|ts|".indexOf(`|${ext}|`) >= 0){
+		$.getScript('//cdn.jsdelivr.net/npm/hls.js/dist/hls.min.js',function(){
+			$.getScript('//cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js',function(){
+			return file_dpvideo(path);
+			});
+		});
+	}
+	
+	if("|m4s|mpd|".indexOf(`|${ext}|`) >= 0){
+		$.getScript('//cdn.jsdelivr.net/npm/dashjs/dist/dash.all.min.js',function(){
+			$.getScript('//cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js',function(){
+			return file_dpvideo(path);
+			});
+		});
 	}
 	
 	if("|mp3|wav|ogg|m4a|".indexOf(`|${ext}|`) >= 0){
 		return file_audio(path);
 	}
 
-	if("|bmp|jpg|jpeg|png|gif|".indexOf(`|${ext}|`) >= 0){
+	if("|bmp|jpg|jpeg|png|gif|webp|".indexOf(`|${ext}|`) >= 0){
 		return file_image(path);
 	}
 }
@@ -209,9 +240,9 @@ function file_code(path){
 		"java":"java",
 		"js":"javascript",
 		"json":"json",
-		"txt":"Text",
+		"txt":"text",
 		"sh":"sh",
-		"md":"Markdown",	
+		"md":"markdown",	
 	};
 	var name = path.split('/').pop();
 	var ext = name.split('.').pop();
@@ -226,8 +257,8 @@ function file_code(path){
 </div>
 <a href="${href}" class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent"><i class="mdui-icon material-icons">file_download</i></a>
 
-<script src="https://cdn.staticfile.org/ace/1.4.7/ace.js"></script>
-<script src="https://cdn.staticfile.org/ace/1.4.7/ext-language_tools.js"></script>
+<script src="//cdn.jsdelivr.net/npm/ace-builds@1.4.8/src-noconflict/ace.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/ace-builds@1.4.8/src-noconflict/ext-language_tools.min.js"></script>
 	`;
 	$('#content').html(content);
 	
@@ -252,7 +283,7 @@ function file_code(path){
 	});
 }
 
-// 文件展示 视频 |mp4|webm|avi|
+// 文件展示 视频 |mp4|webm|
 function file_video(path){
 	var url = window.location.origin + path;
 	var content = `
@@ -268,11 +299,47 @@ function file_video(path){
 	  <input class="mdui-textfield-input" type="text" value="${url}"/>
 	</div>
 	<div class="mdui-textfield">
-	  <label class="mdui-textfield-label">HTML 引用地址</label>
-	  <textarea class="mdui-textfield-input"><video><source src="${url}" type="video/mp4"></video></textarea>
+	  <label class="mdui-textfield-label">HTML 引用</label>
+	  <textarea class="mdui-textfield-input"><video><source src="${url}"></video></textarea>
 	</div>
 </div>
 <a href="${url}" class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent"><i class="mdui-icon material-icons">file_download</i></a>
+	`;
+	$('#content').html(content);
+}
+
+// 文件展示 视频 DPlayer |mov|mkv|mpg|mpeg|flv|f4v|m3u8|ts|m4s|mpd|
+function file_dpvideo(path){
+	var url = window.location.origin + path;
+	var content = `
+	<link class="dplayer-css" rel="stylesheet" href="//cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.css">
+	<div class="mdui-container-fluid">
+	<br>
+	<div id="dplayer"></div>
+	<br>
+	<!-- 固定标签 -->
+	<div class="mdui-textfield">
+	  <label class="mdui-textfield-label">下载地址</label>
+	  <input class="mdui-textfield-input" type="text" value="${url}"/>
+	</div>
+	<div class="mdui-textfield">
+	  <label class="mdui-textfield-label">HTML 引用</label>
+	  <textarea class="mdui-textfield-input"><video><source src="${url}"></video></textarea>
+	</div>
+	</div>
+	<script>
+	// 初始化播放器
+	if (typeof dp == "undefined"){
+	const dp = new DPlayer({
+	container: document.getElementById('dplayer'),
+	lang:'zh-cn',
+	video: {
+	url: '${url}',
+	},
+	});
+	}
+	</script>
+	<a href="${url}" class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent"><i class="mdui-icon material-icons">file_download</i></a>
 	`;
 	$('#content').html(content);
 }
@@ -293,7 +360,7 @@ function file_audio(path){
 	  <input class="mdui-textfield-input" type="text" value="${url}"/>
 	</div>
 	<div class="mdui-textfield">
-	  <label class="mdui-textfield-label">HTML 引用地址</label>
+	  <label class="mdui-textfield-label">HTML 引用</label>
 	  <textarea class="mdui-textfield-input"><audio><source src="${url}"></audio></textarea>
 	</div>
 </div>
@@ -320,7 +387,7 @@ function file_image(path){
 	  <input class="mdui-textfield-input" type="text" value="<img src='${url}' />"/>
 	</div>
         <div class="mdui-textfield">
-	  <label class="mdui-textfield-label">Markdown 引用地址</label>
+	  <label class="mdui-textfield-label">Markdown 引用</label>
 	  <input class="mdui-textfield-input" type="text" value="![](${url})"/>
 	</div>
         <br>
@@ -364,9 +431,9 @@ function utc2beijing(utc_datetime) {
 
 // bytes自适应转换到KB,MB,GB
 function formatFileSize(bytes) {
-    if (bytes>=1000000000) {bytes=(bytes/1000000000).toFixed(2)+' GB';}
-    else if (bytes>=1000000)    {bytes=(bytes/1000000).toFixed(2)+' MB';}
-    else if (bytes>=1000)       {bytes=(bytes/1000).toFixed(2)+' KB';}
+    if (bytes>=1073741824) {bytes=(bytes/1073741824).toFixed(2)+' GB';}
+    else if (bytes>=1048576)    {bytes=(bytes/1048576).toFixed(2)+' MB';}
+    else if (bytes>=1024)       {bytes=(bytes/1024).toFixed(2)+' KB';}
     else if (bytes>1)           {bytes=bytes+' bytes';}
     else if (bytes==1)          {bytes=bytes+' byte';}
     else                        {bytes='';}
