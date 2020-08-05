@@ -145,11 +145,10 @@ function list_files(path,files){
                 });
             }
             var ext = p.split('.').pop();
-            if("|html|php|css|go|java|js|json|txt|sh|md|mp4|webm|avi|bmp|jpg|jpeg|png|gif|m4a|mp3|wav|ogg|mpg|mpeg|mkv|rm|rmvb|mov|wmv|asf|ts|flv|".indexOf(`|${ext}|`) >= 0){
+            if("|html|php|css|go|java|js|json|txt|sh|md|bmp|jpg|jpeg|png|gif|m4a|mp3|wav|ogg|mpg|mpeg|mkv|rm|rmvb|mov|wmv|asf|ts|flv|".indexOf(`|${ext}|`) >= 0){
 	            p += "?a=view";
 	            c += " view";
-            }
-            html += `<li class="mdui-list-item file mdui-ripple" target="_blank"><a gd-type="${item.mimeType}" href="${p}" class="${c}">
+		   html += `<li class="mdui-list-item file mdui-ripple" target="_blank"><a gd-type="${item.mimeType}" href="${p}" class="${c}">
 	          <div class="mdui-col-xs-12 mdui-col-sm-7 mdui-text-truncate">
 	          <i class="mdui-icon material-icons">insert_drive_file</i>
 	            ${item.name}
@@ -158,6 +157,22 @@ function list_files(path,files){
 	          <div class="mdui-col-sm-2 mdui-text-right">${item['size']}</div>
 	          </a>
 	      </li>`;
+            }
+	    if("|mp4|webm|avi|".indexOf(`|${ext}|`) >= 0){
+		    var  pp = "potplayer://"+p
+	            p += "?a=view";
+	            c += " view";
+		   html += `<li class="mdui-list-item file mdui-ripple" target="_blank"><a gd-type="${item.mimeType}" href="${p}" class="${c}">
+	          <div class="mdui-col-xs-12 mdui-col-sm-7 mdui-text-truncate">
+	          <a href="${pp}"><i class="mdui-icon material-icons">insert_drive_file</i></a>
+	            ${item.name}
+	          </div>
+	          <div class="mdui-col-sm-3 mdui-text-right">${item['modifiedTime']}</div>
+	          <div class="mdui-col-sm-2 mdui-text-right">${item['size']}</div>
+	          </a>
+	      </li>`;
+            }
+
         }
     }
     $('#list').html(html);
